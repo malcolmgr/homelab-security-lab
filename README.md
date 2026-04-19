@@ -82,3 +82,6 @@ flowchart TD
         pfSense --- VMnet2
         pfSense --- VMnet3
     end
+
+## Documentation
+Detailed step-by-step build notes for the pfSense gateway, Active Directory promotion, and client integration can be found in the [docs/BUILD_NOTES.md](./docs/BUILD_NOTES.md) file.
