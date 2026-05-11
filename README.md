@@ -7,16 +7,22 @@
 - **Firewall**: pfSense VM acting as a virtualized security gateway and router-on-a-stick.
 - **VNet1 (Defensive/Corp - VMnet2)**: Windows Server 2022 (AD, DHCP, DNS), Windows 10 Client, Ubuntu 22.04 Client, Fedora Headless (Web Server).
 - **VNet2 (Offensive/Isolated - VMnet3)**: Kali Linux, basic_pentesting_1, OWASP Broken Web Apps v1.2.
+- **SIEM (Security Information and Event Management)**: Wazuh Manager hosted on a headless Debian 12 (minimal) instance.
+- **Wazuh Capabilities**: Centralized log aggregation, File Integrity Monitoring (FIM), and real-time vulnerability detection for VNet1.
 
 ## Security Controls
 - **Micro-segmentation**: pfSense firewall rules strictly block VNet2 (Attack Zone) from initiating traffic to VNet1 (Safe Zone).
 - **Traffic Isolation**: VNet1 is configured to log attempts but is logically isolated from the research lab.
 - **Egress Filtering**: All outbound internet traffic passes through pfSense with granular logging and inspection enabled.
+- **Continuous Monitoring**: Wazuh agents deployed on Windows Server and Windows 10 endpoints for deep-level system telemetry.
+- **Vulnerability Management**: Automated CVE scanning and Security Configuration Assessment (SCA) against CIS hardening benchmarks.
 
 ## What I Practice Here
 - **Blue Team**: Active Directory hardening, Group Policy management, log analysis, and system defense.
 - **Red Team**: Web application penetration testing (OWASP Top 10), network enumeration, and privilege escalation.
 - **Network Engineering**: pfSense rule logic, virtual switching (VMnet management), and Internal DNS/Web serving.
+- **SOC Operations**: SIEM deployment and management, log analysis, alert triage, and incident response workflows.
+- **Vulnerability Management**: Identifying unpatched software (CVE tracking) and prioritizing remediation based on CVSS scores.
 
 ## Diagram
 ![Network Diagram](./images/network-diagram.svg)
@@ -31,6 +37,7 @@ flowchart TD
     classDef safe fill:#004d99,stroke:#fff,stroke-width:1px,color:#fff,font-size:16px
     classDef attack fill:#660000,stroke:#fff,stroke-width:1px,color:#fff,font-size:16px
     classDef ai fill:#4b0082,stroke:#fff,stroke-width:1px,color:#fff,font-size:16px
+    classDef siem fill:#006622,stroke:#fff,stroke-width:2px,color:#fff,font-size:16px,font-weight:bold
 
     Internet((Internet)) --- ISP[ISP Gateway]
     ISP --- BE63[TP-Link Deco BE63 Wi-Fi 7]
@@ -55,7 +62,6 @@ flowchart TD
 
         VMnet0[VMnet0: Bridged WAN]
         
-        %% ALIGNED TERMINOLOGY
         VMnet2[VNet 1: Internal Safe Zone - VMnet2]
         VMnet3[VNet 2: Isolated Attack Lab - VMnet3]
 
@@ -65,8 +71,13 @@ flowchart TD
             direction TB
             DC[Win 2022 DC]
             W10[Win 10 Client]
-            Fedora[Fedora Web Server]
-            DC -.-> |DNS| Fedora
+            Ubuntu10[Ubuntu Client]
+            SIEM[fa:fa-eye Wazuh Manager SIEM]
+            
+            W10 -.-> |Agent Logs| SIEM
+            DC -.-> |Agent Logs| SIEM
+            Ubuntu10 -.-> |Agent Logs| SIEM
+            class SIEM siem
         end
         class Safe_Zone safe
 
